@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "save-vacancy",
+  "version": "1.0",
+  "description": "Save a vacancy.",
+  "content_scripts": [
+    {
+      "matches": ["https://hh.ru/*", "https://*.hh.ru/*"],
+      "css": ["styles.css"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "host_permissions": ["https://hh.ru/*"]
+}

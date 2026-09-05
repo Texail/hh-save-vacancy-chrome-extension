@@ -1,0 +1,32 @@
+.hh-ext-bookmark-btn {
+  /* Размеры и форма (40px / 2 = 20px радиуса = идеальный круг) */
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+
+  /* Позиционирование и фон */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent; /* rgba(0, 0, 0, 0) */
+  border: none; /* Убираем все границы */
+  box-sizing: border-box; /* Чтобы padding не увеличивал размер кнопки больше 40px */
+  padding: 8px;
+
+  /* Поведение и шрифты */
+  cursor: pointer;
+  font-family: "hh sans", "Helvetica Neue", sans-serif;
+  font-size: 14px;
+}
+
+.hh-ext-bookmark-btn svg {
+  width: 24px;
+  height: 24px;
+  display: block; /* Убирает невидимые отступы снизу, характерные для inline-элементов */
+  color: rgb(
+    118,
+    134,
+    148
+  ); /* Серый цвет по умолчанию (управляет fill="currentColor") */
+  transition: color 0.2s ease;
+}
