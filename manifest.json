@@ -3,6 +3,11 @@
   "name": "save-vacancy",
   "version": "1.0",
   "description": "Save a vacancy.",
+  "permissions": ["storage"],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "Export list of vacancies"
+  },
   "content_scripts": [
     {
       "matches": ["https://hh.ru/*", "https://*.hh.ru/*"],
