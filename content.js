@@ -126,6 +126,119 @@ async function createSaveVacancyButton(card) {
 }
 
 // ============================================================
+//  Создание кнопки сохранение избранного
+// ============================================================
+async function createSaveFavoritesButton() {
+    const btn = document.createElement("button");
+    btn.textContent = "Сохранить избранное";
+    btn.id = "hh-ext-save-favorites-btn";
+    btn.addEventListener("click", async () => {
+        const originalText = btn.textContent;
+        btn.textContent = "⏳ Сбор данных...";
+        btn.disabled = true;
+
+        let pageNum = 0;
+        let hasMore = true;
+        const maxPages = 50; // Защита от бесконечного цикла
+        let totalSaved = 0;
+
+        try {
+            // Получаем текущие сохраненные вакансии, чтобы объединить с новыми
+            const saved = await getSavedVacancies();
+
+            while (hasMore && pageNum < maxPages) {
+                btn.textContent = `⏳ Обработка страницы ${pageNum + 1}...`;
+
+                // Запрашиваем страницу с текущими cookies авторизации (fetch по умолчанию их отправляет)
+                const url = `/applicant/favorites?tab=vacancies&page=${pageNum}`;
+                const response = await fetch(url);
+
+                if (response.status === 404) {
+                    console.log(
+                        `Достигнут конец списка (страница ${pageNum} вернула 404). Завершаем сбор.`,
+                    );
+                    hasMore = false;
+                    break;
+                }
+                if (!response.ok) {
+                    throw new Error(
+                        `HTTP ошибка! Статус: ${response.status} ${response.statusText}`,
+                    );
+                }
+
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, "text/html");
+
+                // Ищем карточки вакансий на полученной странице
+                const cards = doc.querySelectorAll("[class^='vacancy-card--']");
+
+                // Если карточек нет, значит это последняя страница
+                if (cards.length === 0) {
+                    hasMore = false;
+                    break;
+                }
+
+                for (const card of cards) {
+                    const id = getVacancyId(card);
+                    if (id && !saved[id]) {
+                        saved[id] = getVacancyInfo(card);
+                        totalSaved++;
+                    }
+                }
+
+                // Сохраняем обновленный объект в хранилище после обработки каждой страницы
+                await chrome.storage.local.set({ [STORAGE_KEY]: saved });
+                pageNum++;
+            }
+
+            btn.textContent = `✅ Успешно! Добавлено: ${totalSaved}`;
+
+            // Синхронизируем иконки на текущей открытой странице
+            document
+                .querySelectorAll(".hh-ext-bookmark-btn")
+                .forEach((domBtn) => {
+                    const vId = domBtn.dataset.vacancyId;
+                    if (saved[vId]) {
+                        domBtn.innerHTML = SVG_ACTIVE;
+                        domBtn.dataset.isSaved = "true";
+                    }
+                });
+
+            // Возвращаем кнопке исходный вид через 3 секунды
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }, 3000);
+        } catch (error) {
+            console.error("Ошибка при сохранении избранного:", error);
+            alert(
+                `Произошла ошибка при сборе данных: ${error.message}\nВозможно, сессия истекла или нет доступа. Попробуйте обновить страницу.`,
+            );
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }
+    });
+
+    return btn;
+}
+
+async function processFavoritePage() {
+    const box = document.querySelector("[class^='magritte-box']");
+    if (!box) return;
+    if (box.querySelector(".hh-ext-save-favorites-btn")) {
+        return;
+    }
+    const wrapper = document.createElement("div[class='hh']");
+    wrapper.className = "hh-ext-horizontal-wrapper";
+    wrapper.append(
+        await createSaveFavoritesButton(),
+        box.querySelector("button"),
+    );
+    box.appendChild(wrapper);
+}
+
+// ============================================================
 //  Запуск
 // ============================================================
 (async function init() {
@@ -138,6 +251,7 @@ async function createSaveVacancyButton(card) {
         }
     });
 
+    processFavoritePage();
     await processExistingCards();
 
     const observer = new MutationObserver((mutations) => {

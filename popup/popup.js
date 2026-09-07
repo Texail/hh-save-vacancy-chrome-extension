@@ -30,6 +30,14 @@ async function exportToFile() {
     URL.revokeObjectURL(url);
 }
 
+async function openAll() {
+    const data = await getSavedVacancies();
+    const arr = Object.values(data).map((info) => info?.url);
+    for (const link of arr) {
+        window.open(link, "_blank");
+    }
+}
+
 function clearAll() {
     if (!confirm("Удалить все сохранённые вакансии?")) return;
     chrome.storage.local.set({ [STORAGE_KEY]: {} }, () => {
@@ -49,6 +57,7 @@ function clearAll() {
 }
 
 document.getElementById("export-btn").addEventListener("click", exportToFile);
+document.getElementById("open-btn").addEventListener("click", openAll);
 document.getElementById("clear-btn").addEventListener("click", clearAll);
 
 refreshUI();

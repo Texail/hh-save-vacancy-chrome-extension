@@ -30,3 +30,25 @@
   ); /* Серый цвет по умолчанию (управляет fill="currentColor") */
   transition: color 0.2s ease;
 }
+
+.hh-ext-save-favorites-btn {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  z-index: 9999;
+  padding: 12px 20px;
+  background-color: #0f8cff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(15, 140, 255, 0.3);
+  transition: background-color 0.2s;
+}
+
+.hh-ext-horizontal-wrapper {
+  display: flex;
+  gap: 16px;
+}
